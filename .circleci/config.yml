@@ -20,14 +20,19 @@ jobs:
     steps:
       - run:
           name: "Setup custom environment variables"
-          command: echo $<< parameters.rap_env_prefix >>_DB_HOST
+          command: |
+                if << parameters.rap_env_prefix == "DEV"; then
+                    echo ${ENV_DEV}_DB_HOST
+                  else
+                    echo ${ENV_QA}_DB_HOST
+                fi
 
 workflows:
   build-and-deploy-backend:
     jobs:
       - db-migrations:
           name: db-migrations-dev
-          rap_env_prefix: "$ENV_DEV"
+          rap_env_prefix: DEV
       - db-migrations:
           name: db-migrations-qa
           rap_env_prefix: QA
