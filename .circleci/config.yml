@@ -22,9 +22,9 @@ jobs:
           name: "Setup custom environment variables"
           command: |
                 if "<< parameters.rap_env_prefix >>" == "DEV"; then
-                    echo ${ENV_DEV}_DB_HOST
+                    echo ${!"${ENV_DEV}_DB_HOST"}
                   else
-                    echo ${ENV_QA}_DB_HOST
+                    echo ${!"${ENV_QA}_DB_HOST"}
                 fi
 
 workflows:
