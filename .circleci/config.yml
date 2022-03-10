@@ -27,7 +27,7 @@ workflows:
     jobs:
       - db-migrations:
           name: db-migrations-dev
-          rap_env_prefix: $ENV_DEV
+          rap_env_prefix: "$ENV_DEV"
       - db-migrations:
           name: db-migrations-qa
           rap_env_prefix: QA
