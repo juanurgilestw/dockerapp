@@ -20,7 +20,7 @@ jobs:
     steps:
       - run:
           name: "Setup custom environment variables"
-          command: echo << parameters.rap_env_prefix >>_DB_HOST
+          command: echo $<< parameters.rap_env_prefix >>_DB_HOST
 
 workflows:
   build-and-deploy-backend:
