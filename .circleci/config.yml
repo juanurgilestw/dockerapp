@@ -1,27 +1,34 @@
-version: 2
+version: 2.1
 jobs:
-  build:
-    working_directory: /dockerapp
+  db-migrations:
+    parameters:
+      rap_env_prefix:
+        type: string
+        default: "local"
+    working_directory: /app
     docker:
-      - image: docker:17.05.0-ce-git
+      - image: java:8
+    environment:
+        DB_HOST: << parameters.rap_env_prefix >>_DB_HOST
+        DB_PORT: << parameters.rap_env_prefix >>_DB_PORT
+        DB_NAME: << parameters.rap_env_prefix >>_DB_NAME
+        DB_USERNAME: << parameters.rap_env_prefix >>_DB_USERNAME
+        DB_PASSWORD: << parameters.rap_env_prefix >>_DB_PASSWORD
+        CHANGELOG_FILE_PATH: "db/changelog.yml"
+        LIQUIBASE_VERSION: 3.10.0
+        MYSQL_CONNECTOR_VERSION: 8.0.20
     steps:
       - checkout
-      - setup_remote_docker
       - run:
-          name: Install dependencies
-          command: |
-            apk add --no-cache py-pip=9.0.0-r1
-            pip install docker-compose==1.15.0
-      - run:
-          name: Run tests
-          command: |
-            docker-compose up -d
-            docker-compose run dockerapp python test.py
-      - deploy:
-          name: Push application Docker image
-          command: |
-            docker login -e $DOCKER_HUB_EMAIL -u $DOCKER_HUB_USER_ID -p $DOCKER_HUB_PWD
-            docker tag dockerapp_dockerapp $DOCKER_HUB_USER_ID/dockerapp:$CIRCLE_SHA1
-            docker tag dockerapp_dockerapp $DOCKER_HUB_USER_ID/dockerapp:latest
-            docker push $DOCKER_HUB_USER_ID/dockerapp:$CIRCLE_SHA1
-            docker push $DOCKER_HUB_USER_ID/dockerapp:latest
+          name: "Setup custom environment variables"
+          command: echo << parameters.rap_env_prefix >>_DB_HOST
+
+workflows:
+  build-and-deploy-backend:
+    jobs:
+      - db-migrations:
+          name: db-migrations-dev
+          rap_env_prefix: DEV
+      - db-migrations:
+          name: db-migrations-qa
+          rap_env_prefix: QA
